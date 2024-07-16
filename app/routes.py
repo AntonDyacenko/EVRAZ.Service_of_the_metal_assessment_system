@@ -2,7 +2,7 @@ from flask import render_template, url_for, flash, redirect, request, Blueprint,
 from werkzeug.utils import secure_filename
 import os
 from app import db, bcrypt
-from app.forms import RegistrationForm, LoginForm, MessageForm
+from app.forms import RegistrationForm, LoginForm, MessageForm, ImageUploadForm
 from app.models import User, Message
 from flask_login import login_user, current_user, logout_user, login_required
 
@@ -19,9 +19,18 @@ def allowed_file(filename):
 @bp.route("/index")
 @login_required
 def index():
-    form = MessageForm()
-    messages = Message.query.order_by(Message.date_posted.desc()).all()
-    return render_template('index.html', title='Home', form=form, messages=messages)
+    message_form = MessageForm()
+    upload_form = ImageUploadForm()
+    # Получаем сообщения текущего пользователя и сообщения от системного пользователя
+    system_user = User.query.filter_by(email='system@messenger.com').first()
+    if system_user:
+        messages = Message.query.filter(
+            (Message.user_id == current_user.id) | (Message.user_id == system_user.id)).order_by(
+            Message.date_posted.desc()).all()
+    else:
+        messages = Message.query.filter_by(user_id=current_user.id).order_by(Message.date_posted.desc()).all()
+    return render_template('index.html', title='Home', message_form=message_form, upload_form=upload_form,
+                           messages=messages)
 
 
 @bp.route("/register", methods=['GET', 'POST'])
@@ -47,9 +56,8 @@ def login():
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
         if user and bcrypt.check_password_hash(user.password, form.password.data):
-            login_user(user, remember=form.remember.data)
-            next_page = request.args.get('next')
-            return redirect(next_page) if next_page else redirect(url_for('main.index'))
+            login_user(user)
+            return redirect(url_for('main.index'))
         else:
             flash('Login Unsuccessful. Please check email and password', 'danger')
     return render_template('login.html', title='Login', form=form)
@@ -72,7 +80,7 @@ def message():
         flash('Your message has been sent!', 'success')
 
         # Sending automated response from system user
-        system_user = User.get_system_user()
+        system_user = User.query.filter_by(email='system@messenger.com').first()
         if system_user:
             response_message = Message(content="Ваше сообщение получено", author=system_user)
             db.session.add(response_message)
@@ -83,29 +91,27 @@ def message():
 @bp.route("/upload", methods=['POST'])
 @login_required
 def upload():
-    if 'file' not in request.files:
-        flash('No file part', 'danger')
-        return redirect(url_for('main.index'))
-    file = request.files['file']
-    if file.filename == '':
-        flash('No selected file', 'danger')
-        return redirect(url_for('main.index'))
-    if file and allowed_file(file.filename):
-        filename = secure_filename(file.filename)
-        file.save(os.path.join(current_app.config['UPLOAD_FOLDER'], filename))
-        image_message = Message(content=None, image_file=filename, author=current_user)
-        db.session.add(image_message)
-        db.session.commit()
-        flash('Your image has been successfully uploaded!', 'success')
-
-        # Sending automated response from system user
-        system_user = User.get_system_user()
-        if system_user:
-            response_message = Message(content="Красивая картинка", author=system_user)
-            db.session.add(response_message)
+    form = ImageUploadForm()
+    if form.validate_on_submit():
+        file = form.file.data
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            file.save(os.path.join(current_app.config['UPLOAD_FOLDER'], filename))
+            image_message = Message(content=None, image_file=filename, author=current_user)
+            db.session.add(image_message)
             db.session.commit()
+            flash('Your image has been successfully uploaded!', 'success')
 
-        return redirect(url_for('main.index'))
+            # Sending automated response from system user
+            system_user = User.query.filter_by(email='system@messenger.com').first()
+            if system_user:
+                response_message = Message(content="Красивая картинка", author=system_user)
+                db.session.add(response_message)
+                db.session.commit()
+            return redirect(url_for('main.index'))
+        else:
+            flash('Invalid file type', 'danger')
+            return redirect(url_for('main.index'))
     else:
-        flash('Invalid file type', 'danger')
+        flash('No file selected', 'danger')
         return redirect(url_for('main.index'))
