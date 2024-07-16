@@ -4,6 +4,8 @@ from app.forms import RegistrationForm, LoginForm, MessageForm
 from app.models import User, Message
 from flask_login import login_user, current_user, logout_user, login_required
 import os
+from werkzeug.utils import secure_filename
+from flask import Blueprint, request, redirect, url_for, flash, current_app
 
 bp = Blueprint('main', __name__)
 
@@ -46,7 +48,6 @@ def login():
         else:
             flash('Login Unsuccessful. Please check email and password', 'danger')
     return render_template('login.html', title='Login', form=form)
-
 
 
 @bp.route("/logout")
