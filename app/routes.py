@@ -5,6 +5,7 @@ from app import db, bcrypt
 from app.forms import RegistrationForm, LoginForm, MessageForm, ImageUploadForm
 from app.models import User, Message
 from flask_login import login_user, current_user, logout_user, login_required
+from app.analysis import ImgAnalysis
 
 bp = Blueprint('main', __name__)
 
@@ -105,7 +106,8 @@ def upload():
             # Sending automated response from system user
             system_user = User.query.filter_by(email='system@messenger.com').first()
             if system_user:
-                response_message = Message(content="Красивая картинка", author=system_user)
+                mess = ImgAnalysis(file)()
+                response_message = Message(content=mess, author=system_user)
                 db.session.add(response_message)
                 db.session.commit()
             return redirect(url_for('main.index'))
