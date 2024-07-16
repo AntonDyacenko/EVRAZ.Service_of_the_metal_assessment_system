@@ -30,7 +30,11 @@
             <img class="mr-3 rounded-circle" src="{{ url_for('static', filename='profile_pics/' ~ message.author.image_file) }}" alt="{{ message.author.username }}" width="50" height="50">
             <div class="media-body">
                 <h5 class="mt-0">{{ message.author.username }}</h5>
-                <p>{{ message.content }}</p>
+                {% if message.content %}
+                    <p>{{ message.content }}</p>
+                {% elif message.image_file %}
+                    <img src="{{ url_for('static', filename='profile_pics/' ~ message.image_file) }}" class="img-fluid">
+                {% endif %}
                 <small class="text-muted">{{ message.date_posted.strftime('%Y-%m-%d %H:%M:%S') }}</small>
             </div>
         </div>

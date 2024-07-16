@@ -1,13 +1,18 @@
-from flask import render_template, url_for, flash, redirect, request, Blueprint
+from flask import render_template, url_for, flash, redirect, request, Blueprint, current_app
+from werkzeug.utils import secure_filename
+import os
 from app import db, bcrypt
 from app.forms import RegistrationForm, LoginForm, MessageForm
 from app.models import User, Message
 from flask_login import login_user, current_user, logout_user, login_required
-import os
-from werkzeug.utils import secure_filename
-from flask import Blueprint, request, redirect, url_for, flash, current_app
 
 bp = Blueprint('main', __name__)
+
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
 @bp.route("/")
@@ -65,11 +70,14 @@ def message():
         db.session.add(message)
         db.session.commit()
         flash('Your message has been sent!', 'success')
+
+        # Sending automated response from system user
+        system_user = User.get_system_user()
+        if system_user:
+            response_message = Message(content="Ваше сообщение получено", author=system_user)
+            db.session.add(response_message)
+            db.session.commit()
     return redirect(url_for('main.index'))
-
-
-def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in {'png', 'jpg', 'jpeg', 'gif'}
 
 
 @bp.route("/upload", methods=['POST'])
@@ -85,7 +93,18 @@ def upload():
     if file and allowed_file(file.filename):
         filename = secure_filename(file.filename)
         file.save(os.path.join(current_app.config['UPLOAD_FOLDER'], filename))
+        image_message = Message(content=None, image_file=filename, author=current_user)
+        db.session.add(image_message)
+        db.session.commit()
         flash('Your image has been successfully uploaded!', 'success')
+
+        # Sending automated response from system user
+        system_user = User.get_system_user()
+        if system_user:
+            response_message = Message(content="Красивая картинка", author=system_user)
+            db.session.add(response_message)
+            db.session.commit()
+
         return redirect(url_for('main.index'))
     else:
         flash('Invalid file type', 'danger')
