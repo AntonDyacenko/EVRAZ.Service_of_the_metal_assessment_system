@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
+<link rel="stylesheet" href="static/base.css">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,19 +9,19 @@
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <a class="navbar-brand" href="{{ url_for('main.index') }}">Messenger</a>
+        <a class="navbar-brand" href="{{ url_for('main.index') }}">Анализ микроструктуры</a>
         <div class="collapse navbar-collapse">
             <ul class="navbar-nav ml-auto">
                 {% if current_user.is_authenticated %}
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('main.logout') }}">Logout</a>
+                    <a class="nav-link" href="{{ url_for('main.logout') }}">Выход</a>
                 </li>
                 {% else %}
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('main.login') }}">Login</a>
+                    <a class="nav-link" href="{{ url_for('main.login') }}">Авторизация</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('main.register') }}">Register</a>
+                    <a class="nav-link" href="{{ url_for('main.register') }}">Регистрация</a>
                 </li>
                 {% endif %}
             </ul>
