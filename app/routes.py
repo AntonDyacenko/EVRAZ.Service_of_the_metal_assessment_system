@@ -44,7 +44,7 @@ def register():
         user = User(username=form.username.data, email=form.email.data, password=hashed_password)
         db.session.add(user)
         db.session.commit()
-        flash('Your account has been created!', 'success')
+        flash('Ваш аккаунт успешно создан!', 'success')
         return redirect(url_for('main.login'))
     return render_template('register.html', title='Register', form=form)
 
@@ -60,7 +60,7 @@ def login():
             login_user(user)
             return redirect(url_for('main.index'))
         else:
-            flash('Login Unsuccessful. Please check email and password', 'danger')
+            flash('Авторизация не прошла. Проверте почту и пароль', 'danger')
     return render_template('login.html', title='Login', form=form)
 
 
@@ -78,7 +78,7 @@ def message():
         message = Message(content=form.content.data, author=current_user)
         db.session.add(message)
         db.session.commit()
-        flash('Your message has been sent!', 'success')
+        flash('Ваше сообщение успешно отправлено!', 'success')
 
         # Sending automated response from system user
         system_user = User.query.filter_by(email='system@messenger.com').first()
@@ -101,7 +101,7 @@ def upload():
             image_message = Message(content=None, image_file=filename, author=current_user)
             db.session.add(image_message)
             db.session.commit()
-            flash('Your image has been successfully uploaded!', 'success')
+            flash('Ваше изображение успешно загружено!', 'success')
 
             # Sending automated response from system user
             system_user = User.query.filter_by(email='system@messenger.com').first()
@@ -112,8 +112,8 @@ def upload():
                 db.session.commit()
             return redirect(url_for('main.index'))
         else:
-            flash('Invalid file type', 'danger')
+            flash('Неверный тип файла', 'danger')
             return redirect(url_for('main.index'))
     else:
-        flash('No file selected', 'danger')
+        flash('Файл не выбран', 'danger')
         return redirect(url_for('main.index'))
