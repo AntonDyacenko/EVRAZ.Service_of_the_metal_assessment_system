@@ -1,0 +1,17 @@
+
+h2 {
+color: white;
+}
+.form-group {
+color: white;
+}
+body {
+    background: url(https://snabkz.ru/wp-content/uploads/5/3/7/53746b75d942b2d8d2d2022a055a30c8.jpeg);
+    background-repeat: no-repeat;
+  background-position: center center;
+  background-attachment: fixed;
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
+}
