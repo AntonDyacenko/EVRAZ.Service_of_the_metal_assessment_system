@@ -3,7 +3,7 @@ color: white;
 }
 
 body {
-    background: url(https://metalspace.ru/media/tz_portfolio/article/cache/razlivka-stali-414_o.jpg);
+    background: url(https://indastro.ru/upload/iblock/fdc/fdc5bb117242a170a7cdd2125a847e98.jpg);
     background-repeat: no-repeat;
   background-position: center center;
   background-attachment: fixed;
@@ -13,5 +13,14 @@ body {
   background-size: cover;
 }
 .card-body {
-background-color: black;
+background-color: rgb(30, 30, 30);
+}
+.card my-4 {
+background-color: rgb(30, 30, 30);
+}
+div {
+color: white;}
+
+nav {
+color:red;
 }
